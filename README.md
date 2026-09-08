@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Wayanad Problem Platform (`problems.astragecw.tech`)
 
 > A community-driven platform to report, discuss, upvote, and track public infrastructure, environmental, healthcare, and social issues in Wayanad district. Hosted as a subdomain of [astragecw.tech](https://astragecw.tech/).
@@ -124,3 +125,7 @@ wayanad-problems/
 │   ├── components/         # Reusable UI components (Header, Footer, ProblemCard, etc.)
 │   └── lib/                # Prisma client & category configurations
 ```
+=======
+# wayanad-problems
+"A community-driven web platform to report, discuss, upvote, and track public issues across Wayanad district (problems.astragecw.tech)."
+>>>>>>> 1c281602d472d381a385ba65b7ed89e74d0d2883
