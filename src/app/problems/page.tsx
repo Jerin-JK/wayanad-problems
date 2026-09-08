@@ -1,14 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import ProblemCard from "@/components/ProblemCard";
 
-export default function ProblemsPage() {
+function ProblemsContent() {
+  const searchParams = useSearchParams();
+  
   const [problems, setProblems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [status, setStatus] = useState("All");
+  
+  // Initialize state from URL params
+  const [search, setSearch] = useState(searchParams?.get("search") || "");
+  const [category, setCategory] = useState(searchParams?.get("category") || "All");
+  const [status, setStatus] = useState(searchParams?.get("status") || "All");
   const [sort, setSort] = useState("Newest");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -78,22 +83,16 @@ export default function ProblemsPage() {
             >
               <option>All</option>
               <option>Infrastructure</option>
-              <option>Water</option>
-              <option>Electricity</option>
-              <option>Waste Management</option>
+              <option>Environment</option>
+              <option>Healthcare</option>
+              <option>Education</option>
+              <option>Agriculture</option>
+              <option>Livelihood</option>
+              <option>Utilities</option>
               <option>Other</option>
             </select>
             
-            <select 
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="bg-zinc-950/50 border border-zinc-800 rounded-xl py-3 px-4 text-zinc-300 font-medium focus:outline-none focus:border-cyan-500/50 appearance-none min-w-[140px]"
-            >
-              <option>All</option>
-              <option>Reported</option>
-              <option>In Progress</option>
-              <option>Resolved</option>
-            </select>
+
             
             <select 
               value={sort}
@@ -168,5 +167,13 @@ export default function ProblemsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ProblemsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-zinc-400">Loading...</div>}>
+      <ProblemsContent />
+    </Suspense>
   );
 }

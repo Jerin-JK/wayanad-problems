@@ -98,7 +98,7 @@ export default function CommentSection({
                 <span className="font-medium text-emerald-400">
                   {comment.authorName || 'Anonymous'}
                 </span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-zinc-500" suppressHydrationWarning>
                   {timeAgo(comment.createdAt)}
                 </span>
               </div>

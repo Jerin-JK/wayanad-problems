@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import StatusBadge from './StatusBadge';
 import CategoryBadge from './CategoryBadge';
+import ResolvedVoteButton from './ResolvedVoteButton';
 
 export interface ProblemCardProps {
   id?: string;
@@ -12,6 +12,7 @@ export interface ProblemCardProps {
   location?: string;
   status?: string;
   upvotes?: number;
+  resolvedVotes?: number;
   images?: string | null;
   createdAt?: string | Date;
   commentCount?: number;
@@ -25,6 +26,7 @@ export interface ProblemCardProps {
     location: string;
     status: string;
     upvotes: number;
+    resolvedVotes: number;
     images: string | null;
     createdAt: string | Date;
     comments?: any[];
@@ -60,6 +62,7 @@ export default function ProblemCard(props: ProblemCardProps) {
   const location = p.location || '';
   const status = p.status || 'reported';
   const upvotes = p.upvotes || 0;
+  const resolvedVotes = (p as any).resolvedVotes || 0;
   const images = p.images || null;
   const createdAt = p.createdAt || new Date();
   const commentCount = p.commentCount ?? (p.comments ? p.comments.length : (p._count?.comments ?? 0));
@@ -90,7 +93,6 @@ export default function ProblemCard(props: ProblemCardProps) {
         <div className="p-6 flex-grow flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <CategoryBadge category={category} />
-            <StatusBadge status={status} />
           </div>
 
           <h3 className="text-lg font-bold text-zinc-100 mb-2 line-clamp-1 group-hover:text-emerald-400 transition-colors">
@@ -133,6 +135,7 @@ export default function ProblemCard(props: ProblemCardProps) {
                 </svg>
                 {upvotes}
               </div>
+              <ResolvedVoteButton problemId={id} initialResolvedVotes={resolvedVotes} compact />
             </div>
           </div>
         </div>

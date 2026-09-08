@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import CommentSection from '@/components/CommentSection';
 import UpvoteButton from '@/components/UpvoteButton';
+import ResolvedVoteButton from '@/components/ResolvedVoteButton';
 import CategoryBadge from '@/components/CategoryBadge';
 import StatusBadge from '@/components/StatusBadge';
 import Image from 'next/image';
@@ -102,9 +103,17 @@ export default async function ProblemDetailPage({
           <p className="text-lg md:text-xl text-zinc-300 leading-relaxed whitespace-pre-wrap">
             {problem.description}
           </p>
-          <div className="mt-8 pt-8 border-t border-zinc-800 flex items-center justify-between">
-            <span className="text-zinc-500 font-medium uppercase tracking-widest text-sm">Do you support this issue?</span>
-            <UpvoteButton problemId={problem.id} initialUpvotes={problem.upvotes} />
+          <div className="mt-8 pt-8 border-t border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-zinc-500 font-medium uppercase tracking-widest text-sm">Support this issue?</span>
+                <UpvoteButton problemId={problem.id} initialUpvotes={problem.upvotes} />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-zinc-500 font-medium uppercase tracking-widest text-sm">Think it's resolved?</span>
+                <ResolvedVoteButton problemId={problem.id} initialResolvedVotes={problem.resolvedVotes} />
+              </div>
+            </div>
           </div>
         </div>
 

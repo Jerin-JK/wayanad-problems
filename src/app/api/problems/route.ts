@@ -11,9 +11,17 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '12', 10);
 
+    // Map human-readable status labels to DB values
+    const statusMap: Record<string, string> = {
+      'reported': 'reported',
+      'in progress': 'in_progress',
+      'in_progress': 'in_progress',
+      'resolved': 'resolved',
+    };
+
     const where: any = {};
     if (category) where.category = category;
-    if (status) where.status = status;
+    if (status) where.status = statusMap[status.toLowerCase()] ?? status;
     if (search) {
       where.OR = [
         { title: { contains: search } },

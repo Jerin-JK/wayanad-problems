@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import ProblemCard from "@/components/ProblemCard";
+import StatsBar from "@/components/StatsBar";
+
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   let recentProblems: any[] = [];
@@ -14,12 +17,6 @@ export default async function Home() {
     console.error("Error fetching recent problems:", error);
   }
 
-  // Placeholder stats data
-  const stats = {
-    total: 124,
-    inProgress: 45,
-    resolved: 78
-  };
 
   return (
     <div className="flex flex-col w-full">
@@ -57,23 +54,8 @@ export default async function Home() {
             </Link>
           </div>
           
-          {/* Stats Row */}
-          <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fade-in-up animation-delay-300">
-            {[
-              { label: "TOTAL PROBLEMS", value: stats.total },
-              { label: "IN PROGRESS", value: stats.inProgress },
-              { label: "RESOLVED", value: stats.resolved },
-            ].map((stat, i) => (
-              <div key={i} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center shadow-lg">
-                <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-zinc-500">
-                  {stat.value}
-                </span>
-                <span className="text-xs font-bold tracking-wider text-zinc-500 mt-2 uppercase">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
-          </div>
+          {/* Stats Row - live polling client component */}
+          <StatsBar />
         </div>
       </section>
 

@@ -69,9 +69,11 @@ export default function SubmitProblemPage() {
           body: formData,
         });
         
-        if (!uploadRes.ok) throw new Error('Image upload failed');
         const uploadData = await uploadRes.json();
-        imageUrls = uploadData.urls;
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || 'Image upload failed');
+        }
+        imageUrls = uploadData.urls || [];
       }
 
       const problemData = {
