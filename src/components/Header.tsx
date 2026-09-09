@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import LoginButton from './LoginButton';
 
 export default function Header() {
   const pathname = usePathname();
@@ -45,7 +46,8 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center gap-4">
+            <LoginButton />
             <Link
               href="/submit"
               className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide transition-all shadow-lg hover:shadow-cyan-500/25 active:scale-95"
@@ -91,13 +93,16 @@ export default function Header() {
                 </Link>
               );
             })}
-            <Link
-              href="/submit"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block mt-4 text-center bg-gradient-to-r from-emerald-600 to-cyan-600 text-white px-5 py-3 rounded-xl text-sm font-bold uppercase tracking-wide"
-            >
-              Report Problem
-            </Link>
+            <div className="mt-4 flex flex-col gap-3">
+              <LoginButton />
+              <Link
+                href="/submit"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-center bg-gradient-to-r from-emerald-600 to-cyan-600 text-white px-5 py-3 rounded-xl text-sm font-bold uppercase tracking-wide"
+              >
+                Report Problem
+              </Link>
+            </div>
           </div>
         </div>
       )}

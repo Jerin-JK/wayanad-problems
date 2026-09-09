@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -55,8 +57,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { title, description, category, location, images, reporterName } = body;
+    const { title, description, category, location, images } = body;
 
     if (!title || !description || !category || !location) {
       return NextResponse.json(
@@ -72,7 +79,8 @@ export async function POST(request: NextRequest) {
         category,
         location,
         images: images || [],
-        reporterName: reporterName || 'Anonymous',
+        reporterName: session.user.name || session.user.email || 'Anonymous',
+        userId: session.user.id,
         status: 'reported',
       },
     });

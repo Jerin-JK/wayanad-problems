@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
@@ -24,9 +26,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await request.json();
-    const { content, authorName } = body;
+    const { content } = body;
 
     if (!content) {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
@@ -35,7 +42,8 @@ export async function POST(
     const comment = await prisma.comment.create({
       data: {
         content,
-        authorName: authorName || 'Anonymous',
+        authorName: session.user.name || session.user.email || 'Anonymous',
+        userId: session.user.id,
         problemId: id,
       },
     });
