@@ -1,40 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION ?? 'us-east-2',
+  endpoint: process.env.AWS_ENDPOINT_URL_S3,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+  forcePathStyle: true,
+});
+
+const BUCKET = 'uploads';
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const rawFiles = [...formData.getAll('images'), ...formData.getAll('file')];
-    const files = rawFiles.filter((f): f is File => f instanceof File && f.name !== undefined);
+    const { files } = await request.json(); // Expected: [{ filename, contentType }]
 
-    if (!files || files.length === 0) {
-      return NextResponse.json({ error: 'No files uploaded' }, { status: 400 });
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      return NextResponse.json({ error: 'No files specified' }, { status: 400 });
     }
 
-    const urls: string[] = [];
-    const uploadDir = path.join(process.cwd(), 'public/uploads');
-    await mkdir(uploadDir, { recursive: true });
+    const uploadUrls = [];
+    const endpoint = process.env.AWS_ENDPOINT_URL_S3?.replace(/\/$/, '');
 
     for (const file of files) {
-      if (file.size > 5 * 1024 * 1024) {
-        return NextResponse.json(
-          { error: `File ${file.name} exceeds 5MB limit` },
-          { status: 400 }
-        );
-      }
+      const uniqueKey = `${Date.now()}-${file.filename.replace(/\s+/g, '_')}`;
+      
+      const command = new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: uniqueKey,
+        ContentType: file.contentType || 'application/octet-stream',
+      });
 
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
-      const filePath = path.join(uploadDir, uniqueName);
+      // Generate a presigned URL valid for 5 minutes
+      const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+      const publicUrl = `${endpoint}/${BUCKET}/${uniqueKey}`;
 
-      await writeFile(filePath, buffer);
-      urls.push(`/uploads/${uniqueName}`);
+      uploadUrls.push({
+        uploadUrl,
+        publicUrl,
+      });
     }
 
-    return NextResponse.json({ urls }, { status: 201 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ urls: uploadUrls }, { status: 201 });
+  } catch (error: any) {
+    console.error('Presign error:', error);
+    return NextResponse.json({ error: error.message || 'Presign failed' }, { status: 500 });
   }
 }

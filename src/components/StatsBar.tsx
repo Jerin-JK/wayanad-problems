@@ -27,11 +27,10 @@ export default function StatsBar() {
 
   const items = [
     { label: 'TOTAL PROBLEMS', value: stats?.total ?? '—', href: '/problems' },
-    { label: 'COMMUNITY RESOLVED VOTES', value: stats?.resolvedVotes ?? '—', href: '/problems' },
   ];
 
   return (
-    <div className="mt-24 grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto w-full animate-fade-in-up animation-delay-300">
+    <div className="mt-24 grid grid-cols-1 gap-6 max-w-sm mx-auto w-full animate-fade-in-up animation-delay-300">
       {items.map((stat, i) => (
         <Link
           href={stat.href}

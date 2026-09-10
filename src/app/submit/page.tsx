@@ -62,19 +62,44 @@ export default function SubmitProblemPage() {
       let imageUrls: string[] = [];
 
       if (images.length > 0) {
-        const formData = new FormData();
-        images.forEach((img) => formData.append('images', img));
-        
-        const uploadRes = await fetch('/api/upload', {
+        // 1. Request presigned URLs
+        const fileMetadata = images.map(img => ({
+          filename: img.name,
+          contentType: img.type || 'application/octet-stream',
+        }));
+
+        const presignRes = await fetch('/api/upload', {
           method: 'POST',
-          body: formData,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ files: fileMetadata }),
         });
-        
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok) {
-          throw new Error(uploadData.error || 'Image upload failed');
+
+        if (!presignRes.ok) {
+          const text = await presignRes.text();
+          throw new Error(`Failed to get upload URLs: ${text.slice(0, 100)}`);
         }
-        imageUrls = uploadData.urls || [];
+
+        const { urls } = await presignRes.json();
+
+        // 2. Upload each file directly to S3
+        for (let i = 0; i < images.length; i++) {
+          const file = images[i];
+          const { uploadUrl, publicUrl } = urls[i];
+
+          const uploadRes = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: {
+              'Content-Type': file.type || 'application/octet-stream',
+            },
+          });
+
+          if (!uploadRes.ok) {
+            throw new Error(`Failed to upload image ${file.name}`);
+          }
+          
+          imageUrls.push(publicUrl);
+        }
       }
 
       const problemData = {
@@ -133,15 +158,6 @@ export default function SubmitProblemPage() {
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
                 Continue with Google
-              </button>
-              <button
-                onClick={() => signIn()}
-                className="flex items-center justify-center gap-3 px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-bold text-sm transition-all shadow-lg shadow-emerald-500/25"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Email Magic Link
               </button>
             </div>
           </div>

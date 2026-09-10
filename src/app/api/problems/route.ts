@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, category, location, images } = body;
+    const { title, description, category, location, latitude, longitude, images } = body;
 
     if (!title || !description || !category || !location) {
       return NextResponse.json(
@@ -78,7 +78,9 @@ export async function POST(request: NextRequest) {
         description,
         category,
         location,
-        images: images || [],
+        latitude,
+        longitude,
+        images: images || "[]",
         reporterName: session.user.name || session.user.email || 'Anonymous',
         userId: session.user.id,
         status: 'reported',

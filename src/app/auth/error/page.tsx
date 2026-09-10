@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 const errorMessages: Record<string, { title: string; description: string }> = {
   Configuration: {
@@ -30,7 +31,7 @@ const errorMessages: Record<string, { title: string; description: string }> = {
   },
 };
 
-export default function AuthErrorPage() {
+function ErrorContent() {
   const searchParams = useSearchParams();
   const errorCode = searchParams.get('error') || 'Default';
   const errorInfo = errorMessages[errorCode] || errorMessages.Default;
@@ -87,5 +88,17 @@ export default function AuthErrorPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ErrorContent />
+    </Suspense>
   );
 }

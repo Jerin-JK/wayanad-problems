@@ -5,15 +5,21 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const [total, totalComments, resolvedResult] = await Promise.all([
+    const [total, totalComments, aggregates] = await Promise.all([
       prisma.problem.count(),
       prisma.comment.count(),
-      prisma.$queryRaw<{ total: number }[]>`SELECT COALESCE(SUM(resolvedVotes), 0) as total FROM Problem`,
+      prisma.problem.aggregate({
+        _sum: {
+          resolvedVotes: true,
+          upvotes: true,
+        },
+      }),
     ]);
 
-    const resolvedVotes = Number(resolvedResult[0]?.total ?? 0);
+    const resolvedVotes = aggregates._sum.resolvedVotes ?? 0;
+    const totalUpvotes = aggregates._sum.upvotes ?? 0;
 
-    return NextResponse.json({ total, resolvedVotes, totalComments });
+    return NextResponse.json({ total, resolvedVotes, totalUpvotes, totalComments });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

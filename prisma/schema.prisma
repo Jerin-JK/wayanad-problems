@@ -18,6 +18,8 @@ model Problem {
   images         String    @default("[]")
   upvotes        Int       @default(0)
   resolvedVotes  Int       @default(0)
+  latitude       Float?
+  longitude      Float?
   reporterName   String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
